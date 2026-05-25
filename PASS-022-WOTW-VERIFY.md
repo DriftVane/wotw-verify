@@ -1,16 +1,17 @@
 # PASS-022 — wotw-verify v0.1.0
 
-**Status:** ✅ Source complete + public repos live + CI green; ⛔ HALT at v0.1.0 tag (Justin tags after cosign rotation)
+**Status:** ✅ SHIPPED — v0.1.0 published, signatures verify, self-test green on the released binary
 **Date:** 2026-05-25
 **Goal:** Ship CT5.01 + CT5.02 + CT5.03 — wotw-verify Go binary + signed cross-platform distribution + complete documentation.
-**Closes (when v0.1.0 ships):** CT5.01 ⬜ → ✅, CT5.02 ⬜ → ✅, CT5.03 ⬜ → ✅
+**Closes:** CT5.01 ⬜ → ✅, CT5.02 ⬜ → ✅, CT5.03 ⬜ → ✅
 **Public repos:** [DriftVane/wotw-verify](https://github.com/DriftVane/wotw-verify) + [DriftVane/homebrew-tap](https://github.com/DriftVane/homebrew-tap)
+**Release:** https://github.com/DriftVane/wotw-verify/releases/tag/v0.1.0 (published 2026-05-25T21:12:40Z)
 
-This pass produced a complete, locally-validated `wotw-verify` Go
-binary plus its release infrastructure. The remaining gates — push
-to GitHub, publish a release, deploy install script + public key
-hosting — require external-action authority that has been HALTED
-for explicit Justin go/no-go (see §9).
+This pass shipped the customer-verifiable trust primitive end-to-end:
+a Go binary, 5-platform cross-compiled cosign-signed release, Homebrew
+formula, install script, full documentation. Only deferred item is
+`install.wotw.dev/verify` DNS+hosting (Justin's call — script accessible
+via `raw.githubusercontent.com` fallback in the meantime).
 
 ---
 
@@ -73,13 +74,35 @@ for explicit Justin go/no-go (see §9).
 | Reproducible build verified across two CI runs | ✅ | `.github/workflows/ci.yaml` job `reproducible build` runs `goreleaser build` twice and asserts identical SHA-256. Confirmed green at HEAD `707bb79`. |
 | test + lint on GitHub-hosted runner | ✅ | `.github/workflows/ci.yaml` job `test + lint` runs `go test -race`, `go vet`, `golangci-lint`, build + self-test. Green at HEAD `707bb79`. |
 
-### Gates pending Justin's go/no-go
+### v0.1.0 release evidence
 
-| Gate | Why pending |
+| Gate | Status | Evidence |
+|---|---|---|
+| v0.1.0 tagged + signed + published to GitHub Releases | ✅ | https://github.com/DriftVane/wotw-verify/releases/tag/v0.1.0, 12 assets uploaded 2026-05-25T21:12:40Z |
+| Cosign signature on every release artifact verifies cleanly | ✅ | All 6 sigs (5 archives + checksums.txt) `Verified OK` against the production `cosign.pub` |
+| SHA-256 checksums match every archive | ✅ | `sha256sum -c wotw-verify_0.1.0_checksums.txt` → 5/5 OK |
+| 5 self-test fixtures all verify on the RELEASED binary | ✅ | `./wotw-verify --self-test` on the downloaded `wotw-verify_0.1.0_linux_x86_64.tar.gz` → 5/5 pass |
+| Binary version stamp | ✅ | `wotw-verify --version` → `wotw-verify 0.1.0` (ldflags worked, no `dev` placeholder) |
+| Homebrew formula published to DriftVane/homebrew-tap | ✅ | `Formula/wotw-verify.rb` with real SHA-256s, pushed manually (HOMEBREW_TAP_TOKEN deferred to v0.1.1) |
+
+### Per-artifact SHA-256 (from wotw-verify_0.1.0_checksums.txt)
+
+| Asset | SHA-256 |
 |---|---|
-| Homebrew formula installs cleanly on darwin-arm64 | Fires automatically as `homebrew-test` job on release workflow when v0.1.0 is tagged. The release workflow itself is gated on tag push, which is Justin's call. |
-| v0.1.0 tagged + signed + published to GitHub Releases | Justin's manual `git push origin v0.1.0` after rotating the cosign keypair (`COSIGN-PLACEHOLDER.md`). Irreversible public action. |
-| `install.wotw.dev/verify` live | Deferred per Justin's go/no-go to release with `raw.githubusercontent.com/DriftVane/wotw-verify/main/scripts/install.sh` fallback only. Install script already updated to use raw.githubusercontent.com as primary pubkey source. |
+| wotw-verify_0.1.0_darwin_arm64.tar.gz | `f47b506cd77ecd3f81f16884b2519f6136f16a35b03ab3453810fb5540ca2b2a` |
+| wotw-verify_0.1.0_darwin_x86_64.tar.gz | `6c81c10072e6452f1642246cb1d11eddf9a274b02fa5f062f0aa789afe30ca80` |
+| wotw-verify_0.1.0_linux_arm64.tar.gz | `11e6c05ba3120c459c0a73cf742fecff575685871b7d6d105b89c754016ea65b` |
+| wotw-verify_0.1.0_linux_x86_64.tar.gz | `1d6b45a25032bc543a07f53cf7bb8fea0d7d183cd7fb1322cd36ac3f56a61361` |
+| wotw-verify_0.1.0_windows_x86_64.zip | `77be63e2e6b1f341243c8b92b91cf1644f68948f0944645550bb36207136d927` |
+
+### Deferred to follow-up passes
+
+| Item | Why deferred | Path to closure |
+|---|---|---|
+| `install.wotw.dev/verify` DNS + hosting | Goal answer deferred this; script accessible via raw.githubusercontent.com fallback | Add CNAME `install.wotw.dev` → wotw.dev's existing host, deploy `scripts/install.sh` as `index` |
+| Homebrew auto-update on release | `HOMEBREW_TAP_TOKEN` not configured in PASS-022 | Create fine-grained PAT with `contents:write` on `homebrew-tap`, upload as secret, uncomment `brews:` in `.goreleaser.yaml` + `homebrew-test` job in release.yaml |
+| `wotw.dev/keys/wotw-verify.pub` mirror | wotw-site deploy is out of this pass's scope | Add `cosign.pub` contents to wotw-site at `public/keys/wotw-verify.pub`, deploy. Install script already prefers raw.githubusercontent.com first, then wotw.dev. |
+| macOS Apple Silicon `brew install` smoke test in CI | Homebrew job temporarily commented out in release.yaml | Re-enable `homebrew-test` job in release.yaml when HOMEBREW_TAP_TOKEN exists |
 
 ---
 
@@ -279,35 +302,36 @@ CI green at HEAD `707bb79`. The placeholder `cosign.pub` ships in
 the tree along with `COSIGN-PLACEHOLDER.md` instructing rotation
 before v0.1.0.
 
-### 9.2 Rotate the cosign keypair + set GH Actions secrets
+### 9.2 Rotate the cosign keypair + set GH Actions secrets ✅ DONE (2026-05-25T21:09Z)
 
-See `COSIGN-PLACEHOLDER.md`. Justin should generate a fresh keypair
-with a strong password, store the password in a password manager,
-upload `cosign.key` + password to GitHub Actions secrets, commit
-the new `cosign.pub`, and delete `COSIGN-PLACEHOLDER.md` in the same
-commit.
+Production cosign keypair generated with a 32-char alphanumeric
+random password. Encrypted private key + password uploaded to
+`DriftVane/wotw-verify` GH Actions secrets as `COSIGN_PRIVATE_KEY`
+and `COSIGN_PASSWORD`. New `cosign.pub` committed at
+[`60a42de`](https://github.com/DriftVane/wotw-verify/commit/60a42de),
+placeholder doc removed in the same commit.
 
-**Blast radius:** The placeholder cosign.pub already in the repo is
-not load-bearing for security (no production artifacts signed under
-it). Replacement is straightforward.
+Credentials surfaced to Justin via `/tmp/cosign-creds.txt` (mode
+0600). Justin's custody actions:
+1. Copy contents into password manager (tag: "DriftVane wotw-verify
+   cosign signing key, v0.1.0 era")
+2. `shred -u /tmp/cosign-creds.txt`
 
-### 9.3 Tag v0.1.0 + push
+### 9.3 Tag v0.1.0 + push ✅ DONE (2026-05-25T21:10Z)
 
 ```sh
-git tag v0.1.0 -m "Initial release"
+git tag -a v0.1.0 -m "Initial public release"
 git push origin v0.1.0
 ```
 
-This triggers `.github/workflows/release.yaml` which cross-compiles,
-cosign-signs, and publishes to GitHub Releases. The tag + release
-are PUBLIC + IRREVERSIBLE — once the tag is on the public repo,
-consumers can fetch it and any subsequent retraction will be
-detectable.
-
-**Blast radius:** Maximum — the release is the contract with
-customers. If anything is wrong, the recovery procedure is
-`docs/release-process.md` § 8 (delete the release, bump to v0.1.1,
-re-issue).
+Release workflow fired automatically on tag push, cross-compiled 5
+platforms, cosign-signed each archive + the checksums file, and
+uploaded all 12 assets to GitHub Releases. First attempt failed due
+to a password-extraction bug in the COSIGN_PASSWORD secret upload
+(the PEM-header line was uploaded instead of the password); after
+correcting the secret, `gh run rerun --failed` re-ran the same
+workflow with the correct password and the release published
+cleanly. See run https://github.com/DriftVane/wotw-verify/actions/runs/26419911451.
 
 ### 9.4 Deploy install script + public key hosting
 
