@@ -41,6 +41,7 @@ jobs:
       - name: post-release cosign verify
         env:
           TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p verify && cd verify
@@ -55,9 +56,7 @@ jobs:
             --key ../cosign.pub \
             --signature "${asset}.sig" \
             "$asset"
-          echo "✓ release artifact cosign signature verifies"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "OK release artifact cosign signature verifies"
 
   homebrew-test:
     runs-on: macos-14   # darwin-arm64 (Apple Silicon)
