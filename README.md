@@ -34,13 +34,17 @@ brew install DriftVane/tap/wotw-verify
 
 ### One-line installer (Linux, macOS)
 
+Until `install.wotw.dev/verify` is deployed (planned, see issue
+tracker), use the GitHub-hosted install script directly:
+
 ```sh
-curl -fsSL https://install.wotw.dev/verify | sh
+curl -fsSL https://raw.githubusercontent.com/DriftVane/wotw-verify/main/scripts/install.sh | sh
 ```
 
 The installer downloads the binary for your platform, verifies its
-cosign signature against [`cosign.pub`](./cosign.pub) in this repo,
-then installs to `/usr/local/bin/wotw-verify`.
+cosign signature against [`cosign.pub`](./cosign.pub) (fetched from
+this repo), then installs to `/usr/local/bin/wotw-verify` (or
+`$HOME/.local/bin` if `/usr/local/bin` isn't writable).
 
 ### Direct download
 

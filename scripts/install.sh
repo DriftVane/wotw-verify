@@ -23,8 +23,10 @@
 set -eu
 
 REPO="DriftVane/wotw-verify"
-PUBKEY_URL="https://wotw.dev/keys/wotw-verify.pub"
-PUBKEY_URL_FALLBACK="https://raw.githubusercontent.com/DriftVane/wotw-verify/main/cosign.pub"
+# Primary pubkey URL: served from wotw.dev once DNS+hosting is up.
+# Until then, the fallback (raw.githubusercontent.com) is authoritative.
+PUBKEY_URL="https://raw.githubusercontent.com/DriftVane/wotw-verify/main/cosign.pub"
+PUBKEY_URL_FALLBACK="https://wotw.dev/keys/wotw-verify.pub"
 
 TAG="${1:-latest}"
 
