@@ -58,14 +58,19 @@ jobs:
             "$asset"
           echo "OK release artifact cosign signature verifies"
 
-  homebrew-test:
-    runs-on: macos-14   # darwin-arm64 (Apple Silicon)
-    needs: release
-    if: ${{ !contains(github.ref_name, '-rc') && !contains(github.ref_name, '-alpha') && !contains(github.ref_name, '-beta') }}
-    steps:
-      - name: install via Homebrew tap
-        run: |
-          brew tap DriftVane/tap
-          brew install wotw-verify
-          wotw-verify --version
-          wotw-verify --self-test
+  # homebrew-test runs only AFTER the formula has been pushed to
+  # DriftVane/homebrew-tap. For v0.1.0 that's a manual step after the
+  # release lands; the job is skipped on the v0.1.0 tag. Re-enable
+  # once the tap is populated:
+  #
+  # homebrew-test:
+  #   runs-on: macos-14   # darwin-arm64 (Apple Silicon)
+  #   needs: release
+  #   if: ${{ !contains(github.ref_name, '-rc') && !contains(github.ref_name, '-alpha') && !contains(github.ref_name, '-beta') }}
+  #   steps:
+  #     - name: install via Homebrew tap
+  #       run: |
+  #         brew tap DriftVane/tap
+  #         brew install wotw-verify
+  #         wotw-verify --version
+  #         wotw-verify --self-test

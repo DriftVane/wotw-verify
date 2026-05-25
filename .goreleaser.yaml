@@ -139,20 +139,26 @@ release:
     See `docs/release-process.md` for the full reproducible-build +
     cosign-verification procedure.
 
-brews:
-  - name: wotw-verify
-    repository:
-      owner: DriftVane
-      name: homebrew-tap
-      branch: main
-    directory: Formula
-    homepage: https://github.com/DriftVane/wotw-verify
-    description: Customer-verifiable trust primitive for wotw Compliance Packs
-    license: Apache-2.0
-    test: |
-      assert_match "wotw-verify", shell_output("#{bin}/wotw-verify --version")
-      system "#{bin}/wotw-verify", "--self-test"
-    commit_author:
-      name: driftvane-release-bot
-      email: release-bot@driftvane.com
-    commit_msg_template: "wotw-verify {{ .Tag }}"
+# Homebrew auto-update gated on HOMEBREW_TAP_TOKEN being present.
+# v0.1.0 ships without it; formula is pushed manually after the
+# release lands. Enable for v0.1.1+ by creating a fine-grained PAT
+# with `contents:write` on DriftVane/homebrew-tap and uploading as
+# HOMEBREW_TAP_TOKEN secret, then uncomment the block below.
+#
+# brews:
+#   - name: wotw-verify
+#     repository:
+#       owner: DriftVane
+#       name: homebrew-tap
+#       branch: main
+#     directory: Formula
+#     homepage: https://github.com/DriftVane/wotw-verify
+#     description: Customer-verifiable trust primitive for wotw Compliance Packs
+#     license: Apache-2.0
+#     test: |
+#       assert_match "wotw-verify", shell_output("#{bin}/wotw-verify --version")
+#       system "#{bin}/wotw-verify", "--self-test"
+#     commit_author:
+#       name: driftvane-release-bot
+#       email: release-bot@driftvane.com
+#     commit_msg_template: "wotw-verify {{ .Tag }}"
