@@ -1,0 +1,10 @@
+/dist/
+/wotw-verify
+/wotw-verify.exe
+*.test
+*.out
+.idea/
+.vscode/
+*.cosign.key
+*.cosign.password
+cosign.key

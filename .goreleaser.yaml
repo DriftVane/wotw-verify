@@ -1,0 +1,158 @@
+version: 2
+
+# wotw-verify release config.
+#
+# Builds reproducible binaries across 5 platforms, cosign-signs each
+# release artifact + the SHA256SUMS checksums file, and uploads to
+# GitHub Releases on tag push.
+#
+# Reproducibility:
+#   - -trimpath strips local path prefixes from the binary
+#   - -buildvcs=false suppresses embedding the VCS revision (which would
+#     drift on a rebuild of the same commit if the working tree differs)
+#   - SOURCE_DATE_EPOCH (set by the CI workflow to the tag's committer
+#     timestamp) pins file mtimes inside archives + the binary build ID
+#   - mod_timestamp inside each build config bakes the commit-date into
+#     the binary itself
+#
+# Cosign signing is configured under `signs:` for the checksums file
+# and the release artifacts. The signing key is provided as a GitHub
+# Actions secret COSIGN_PRIVATE_KEY (cosign-encrypted, password in
+# COSIGN_PASSWORD).
+
+project_name: wotw-verify
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: wotw-verify
+    main: ./cmd/wotw-verify
+    binary: wotw-verify
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # No Windows arm64 target — drop combinations we don't support.
+      - goos: windows
+        goarch: arm64
+    flags:
+      - -trimpath
+      - -buildvcs=false
+    ldflags:
+      - -s -w
+      - -X github.com/DriftVane/wotw-verify/internal/verify.ToolVersion={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: wotw-verify
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - LICENSE
+      - README.md
+      - docs/verification-protocol.md
+      - docs/threat-model.md
+      - cosign.pub
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+signs:
+  - id: cosign-checksums
+    cmd: cosign
+    args:
+      - "sign-blob"
+      - "--key=env://COSIGN_PRIVATE_KEY"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+    output: true
+    signature: "${artifact}.sig"
+
+  - id: cosign-archives
+    cmd: cosign
+    args:
+      - "sign-blob"
+      - "--key=env://COSIGN_PRIVATE_KEY"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: archive
+    output: true
+    signature: "${artifact}.sig"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "Merge pull request"
+      - "Merge branch"
+
+release:
+  github:
+    owner: DriftVane
+    name: wotw-verify
+  header: |
+    # wotw-verify {{ .Version }}
+
+    Customer-verifiable trust primitive for the wotw Compliance Pack format.
+
+    Verify cosign signatures on the artifacts below using `cosign.pub`
+    from this repo:
+
+        cosign verify-blob --key cosign.pub \
+          --signature <archive>.sig <archive>
+
+    Or use the install script:
+
+        curl -fsSL https://install.wotw.dev/verify | sh
+  footer: |
+    See `docs/release-process.md` for the full reproducible-build +
+    cosign-verification procedure.
+
+brews:
+  - name: wotw-verify
+    repository:
+      owner: DriftVane
+      name: homebrew-tap
+      branch: main
+    directory: Formula
+    homepage: https://github.com/DriftVane/wotw-verify
+    description: Customer-verifiable trust primitive for wotw Compliance Packs
+    license: Apache-2.0
+    test: |
+      assert_match "wotw-verify", shell_output("#{bin}/wotw-verify --version")
+      system "#{bin}/wotw-verify", "--self-test"
+    commit_author:
+      name: driftvane-release-bot
+      email: release-bot@driftvane.com
+    commit_msg_template: "wotw-verify {{ .Tag }}"
