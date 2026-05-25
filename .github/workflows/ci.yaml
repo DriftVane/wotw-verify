@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test + lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          check-latest: true
+
+      - name: go test
+        run: go test -race ./...
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.62.2
+
+      - name: build + self-test
+        run: |
+          go build -o wotw-verify ./cmd/wotw-verify
+          ./wotw-verify --self-test
+
+  reproducibility:
+    name: reproducible build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: install goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+          version: v2.6.1
+
+      - name: build twice + diff SHAs
+        run: |
+          set -euo pipefail
+          goreleaser build --snapshot --clean --single-target
+          sha256sum dist/wotw-verify_linux_amd64_v1/wotw-verify | tee /tmp/sha1.txt
+          rm -rf dist
+          goreleaser build --snapshot --clean --single-target
+          sha256sum dist/wotw-verify_linux_amd64_v1/wotw-verify | tee /tmp/sha2.txt
+          # Compare just the hash portion
+          h1=$(awk '{print $1}' /tmp/sha1.txt)
+          h2=$(awk '{print $1}' /tmp/sha2.txt)
+          if [ "$h1" != "$h2" ]; then
+            echo "REPRODUCIBLE BUILD CHECK FAILED"
+            echo "  run 1: $h1"
+            echo "  run 2: $h2"
+            exit 1
+          fi
+          echo "✓ identical SHA-256 across two builds: $h1"
