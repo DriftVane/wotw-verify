@@ -1,9 +1,10 @@
 # PASS-022 — wotw-verify v0.1.0
 
-**Status:** ✅ Source complete; ⛔ HALT at external-action gates
+**Status:** ✅ Source complete + public repos live + CI green; ⛔ HALT at v0.1.0 tag (Justin tags after cosign rotation)
 **Date:** 2026-05-25
 **Goal:** Ship CT5.01 + CT5.02 + CT5.03 — wotw-verify Go binary + signed cross-platform distribution + complete documentation.
-**Closes (when external gates flip):** CT5.01 ⬜ → ✅, CT5.02 ⬜ → ✅, CT5.03 ⬜ → ✅
+**Closes (when v0.1.0 ships):** CT5.01 ⬜ → ✅, CT5.02 ⬜ → ✅, CT5.03 ⬜ → ✅
+**Public repos:** [DriftVane/wotw-verify](https://github.com/DriftVane/wotw-verify) + [DriftVane/homebrew-tap](https://github.com/DriftVane/homebrew-tap)
 
 This pass produced a complete, locally-validated `wotw-verify` Go
 binary plus its release infrastructure. The remaining gates — push
@@ -65,14 +66,20 @@ for explicit Justin go/no-go (see §9).
 | Byte-identity with daemon canonical JSON | ✅ | `internal/canonical/canonical_test.go::TestByteIdentityWithDaemonRuntime` asserts the same payload hashes to `bd2b22d1d887bab937fc14079c23f573ef2048b6755666dee1d906ccd9c90d82` in both Go and Node |
 | PASS-018 contract integrity | ✅ | `internal/contract/contract_test.go::TestPASS018MarkdownIntegrity` asserts embedded doc SHA-256 = `fffb6e9088f280ce24770e42f5fcc6863431cb6ff713c20f931f0441f9a0d67e` |
 
-### Gates pending CI / external steps
+### Gates green on CI (post-push)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| Reproducible build verified across two CI runs | ✅ | `.github/workflows/ci.yaml` job `reproducible build` runs `goreleaser build` twice and asserts identical SHA-256. Confirmed green at HEAD `707bb79`. |
+| test + lint on GitHub-hosted runner | ✅ | `.github/workflows/ci.yaml` job `test + lint` runs `go test -race`, `go vet`, `golangci-lint`, build + self-test. Green at HEAD `707bb79`. |
+
+### Gates pending Justin's go/no-go
 
 | Gate | Why pending |
 |---|---|
-| Reproducible build verified across two CI runs | Requires CI infrastructure to actually run (.github/workflows/ci.yaml runs the check on every PR + push, but cannot execute until the repo is pushed to GitHub) |
-| Homebrew formula installs cleanly on darwin-arm64 | Requires GitHub Actions `macos-14` (Apple Silicon) runner — the release workflow's `homebrew-test` job covers this |
-| v0.1.0 tagged + signed + published to GitHub Releases | Requires the repo to exist on GitHub + tag push (irreversible public action — see §9) |
-| Install script downloads correct platform binary + cosign-verifies before extracting | Requires `install.wotw.dev/verify` DNS + hosting (see §9) — script logic is tested via local mock |
+| Homebrew formula installs cleanly on darwin-arm64 | Fires automatically as `homebrew-test` job on release workflow when v0.1.0 is tagged. The release workflow itself is gated on tag push, which is Justin's call. |
+| v0.1.0 tagged + signed + published to GitHub Releases | Justin's manual `git push origin v0.1.0` after rotating the cosign keypair (`COSIGN-PLACEHOLDER.md`). Irreversible public action. |
+| `install.wotw.dev/verify` live | Deferred per Justin's go/no-go to release with `raw.githubusercontent.com/DriftVane/wotw-verify/main/scripts/install.sh` fallback only. Install script already updated to use raw.githubusercontent.com as primary pubkey source. |
 
 ---
 
@@ -256,22 +263,21 @@ external actions are required to flip CT5.01-5.03 from ⬜ to ✅, and
 each requires explicit Justin authorization — they are public,
 irreversible, and affect shared infrastructure beyond this machine.
 
-### 9.1 Create the public GitHub repos
+### 9.1 Create the public GitHub repos ✅ DONE
 
 ```sh
-# Main repo — public (the whole point of CT5 is third-party verifiability)
-gh repo create DriftVane/wotw-verify --public --source=/home/jgoodman/wotw-verify \
-  --description="Customer-verifiable trust primitive for wotw Compliance Packs" \
-  --push
-
-# Homebrew tap repo
-gh repo create DriftVane/homebrew-tap --public \
-  --description="DriftVane Homebrew formulae"
+gh repo create DriftVane/wotw-verify --public --source=. --push
+gh repo create DriftVane/homebrew-tap --public
 ```
 
-**Blast radius:** Public — anyone can clone the repo + read every
-commit + the placeholder cosign.pub. The repo can be deleted but the
-GitHub event log records it existed.
+Both repos are live as of 2026-05-25:
+
+- https://github.com/DriftVane/wotw-verify (public, default branch `main`)
+- https://github.com/DriftVane/homebrew-tap (public, empty for now)
+
+CI green at HEAD `707bb79`. The placeholder `cosign.pub` ships in
+the tree along with `COSIGN-PLACEHOLDER.md` instructing rotation
+before v0.1.0.
 
 ### 9.2 Rotate the cosign keypair + set GH Actions secrets
 
