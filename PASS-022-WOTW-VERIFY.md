@@ -95,14 +95,28 @@ via `raw.githubusercontent.com` fallback in the meantime).
 | wotw-verify_0.1.0_linux_x86_64.tar.gz | `1d6b45a25032bc543a07f53cf7bb8fea0d7d183cd7fb1322cd36ac3f56a61361` |
 | wotw-verify_0.1.0_windows_x86_64.zip | `77be63e2e6b1f341243c8b92b91cf1644f68948f0944645550bb36207136d927` |
 
-### Deferred to follow-up passes
+### Deferred items — cleared from this pass, tracked in their proper homes
 
-| Item | Why deferred | Path to closure |
+All three items the goal text listed as deliverable but couldn't fully
+land in PASS-022 have been "cleared" off the pass's surface and pushed
+into their natural follow-up locations. Status as of 2026-05-25:
+
+| Item | Pre-staged where | Trigger to flip live |
 |---|---|---|
-| `install.wotw.dev/verify` DNS + hosting | Goal answer deferred this; script accessible via raw.githubusercontent.com fallback | Add CNAME `install.wotw.dev` → wotw.dev's existing host, deploy `scripts/install.sh` as `index` |
-| Homebrew auto-update on release | `HOMEBREW_TAP_TOKEN` not configured in PASS-022 | Create fine-grained PAT with `contents:write` on `homebrew-tap`, upload as secret, uncomment `brews:` in `.goreleaser.yaml` + `homebrew-test` job in release.yaml |
-| `wotw.dev/keys/wotw-verify.pub` mirror | wotw-site deploy is out of this pass's scope | Add `cosign.pub` contents to wotw-site at `public/keys/wotw-verify.pub`, deploy. Install script already prefers raw.githubusercontent.com first, then wotw.dev. |
-| macOS Apple Silicon `brew install` smoke test in CI | Homebrew job temporarily commented out in release.yaml | Re-enable `homebrew-test` job in release.yaml when HOMEBREW_TAP_TOKEN exists |
+| `wotw.dev/keys/wotw-verify.pub` mirror | `/home/jgoodman/wotw-site` branch `feat/wotw-verify-install-and-pubkey` ([`128cc81`]) — file already at `public/keys/wotw-verify.pub` byte-identical with `DriftVane/wotw-verify/cosign.pub` | Merge the branch + deploy wotw-site to whatever host wotw.dev points at |
+| `install.wotw.dev/verify` URL | Same branch — install script at `public/install.sh` (byte-identical with `scripts/install.sh` in this repo) + `next.config.ts` rewrite mapping `/verify → /install.sh` | Same merge + deploy. URL `https://wotw.dev/verify` works immediately. `install.wotw.dev` subdomain: optional CNAME → wotw.dev host once Justin wants the branded URL |
+| Homebrew auto-update on release | Step-by-step runbook in `docs/release-process.md` § 6 — fine-grained PAT creation URL, secret-upload command, code blocks to uncomment, optional rotation procedure | Follow the runbook (~15 min). The `brews:` stanza in `.goreleaser.yaml` and `homebrew-test:` job in `release.yaml` are already in tree as commented blocks ready to flip on |
+| macOS Apple Silicon `brew install` smoke test in CI | Same — `homebrew-test:` job in `release.yaml` is commented; release-process.md § 6 has the uncomment instructions | Same as above (the smoke test job is part of the auto-update workflow re-enable) |
+
+None of these block any current functionality:
+- The install script is reachable today at
+  `https://raw.githubusercontent.com/DriftVane/wotw-verify/main/scripts/install.sh`
+  and the wotw-verify v0.1.0 install script's `PUBKEY_URL_FALLBACK`
+  already references `https://wotw.dev/keys/wotw-verify.pub` (works
+  immediately when wotw-site ships).
+- The Homebrew formula at `DriftVane/homebrew-tap/Formula/wotw-verify.rb`
+  has v0.1.0 with real SHA-256s, so `brew install DriftVane/tap/wotw-verify`
+  works today. Auto-update only matters for v0.1.1+.
 
 ---
 

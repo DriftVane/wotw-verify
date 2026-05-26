@@ -239,16 +239,97 @@ vulnerability".
 
 ## 6. Homebrew tap
 
-The release workflow opens a PR against `DriftVane/homebrew-tap`
-updating `Formula/wotw-verify.rb` with the new version + URL +
-SHA-256 of the macOS arm64 + x86_64 archives.
+The release workflow can optionally auto-update
+`DriftVane/homebrew-tap/Formula/wotw-verify.rb` on every tagged
+release. This is GATED on a `HOMEBREW_TAP_TOKEN` secret being present
+on `DriftVane/wotw-verify`; in v0.1.0 the formula was pushed
+manually because the secret wasn't set.
 
-A maintainer reviews the PR and merges. From that point, `brew
-upgrade wotw-verify` picks up the new release.
+### Enabling auto-update (one-time, ~15 minutes)
 
-The Homebrew formula includes a `test do` block that runs
-`wotw-verify --version` AND `wotw-verify --self-test`. If either
-fails post-install, `brew test wotw-verify` exits non-zero.
+1. Create a fine-grained Personal Access Token at
+   https://github.com/settings/personal-access-tokens/new
+
+   - **Token name:** `wotw-verify release: homebrew-tap auto-update`
+   - **Resource owner:** `DriftVane`
+   - **Repository access:** Only select repositories → `DriftVane/homebrew-tap`
+   - **Repository permissions:** Contents → **Read and write**
+     (all other permissions stay at default "no access")
+   - **Expiration:** 1 year (or your preferred policy; remember to rotate)
+
+   Copy the resulting `github_pat_*` token to clipboard.
+
+2. Upload the token as a secret on `DriftVane/wotw-verify`:
+
+   ```sh
+   echo "github_pat_*" | gh secret set HOMEBREW_TAP_TOKEN \
+     --repo DriftVane/wotw-verify
+   ```
+
+3. Re-enable the relevant blocks (commented out in v0.1.0):
+
+   - In `.goreleaser.yaml`: uncomment the `brews:` stanza (lines
+     ~108–127).
+   - In `.github/workflows/release.yaml`: uncomment the
+     `homebrew-test:` job (lines ~73–84).
+
+4. Commit and tag the next release. The release workflow will:
+
+   - Compute SHA-256s for the macOS + Linux archives.
+   - Open a commit on `DriftVane/homebrew-tap` (NOT a PR — direct
+     push to `main`) updating `Formula/wotw-verify.rb`.
+   - Trigger the `homebrew-test` job which runs `brew install` on
+     `macos-14` (Apple Silicon) and asserts `wotw-verify --version`
+     and `wotw-verify --self-test` succeed.
+
+The Homebrew formula's `test do` block runs `wotw-verify --version`
+AND `wotw-verify --self-test`. If either fails post-install,
+`brew test wotw-verify` exits non-zero.
+
+### Manual update path (used in v0.1.0)
+
+If `HOMEBREW_TAP_TOKEN` is not set, the `brews:` stanza in
+`.goreleaser.yaml` must be commented out (or pass `--skip=homebrew`
+to GoReleaser) — otherwise the workflow fails on the homebrew step.
+After the release publishes:
+
+```sh
+# Get the SHA-256s
+gh release view v$VERSION --repo DriftVane/wotw-verify \
+  --json assets --jq '.assets[].name'
+gh release download v$VERSION --repo DriftVane/wotw-verify \
+  --pattern 'wotw-verify_*_checksums.txt'
+cat wotw-verify_${VERSION}_checksums.txt
+
+# Update the formula manually
+git clone https://github.com/DriftVane/homebrew-tap
+# Edit Formula/wotw-verify.rb: bump version + URLs + sha256 lines
+git commit -am "wotw-verify v$VERSION"
+git push
+```
+
+This is what shipped v0.1.0. v0.1.1+ should use the auto-update
+path above unless there's a deliberate reason to gate releases on
+manual formula review.
+
+### Rotating the HOMEBREW_TAP_TOKEN
+
+The fine-grained PAT expires (per the policy you set at creation).
+Before expiry:
+
+```sh
+# 1. Generate a new PAT with identical scope at
+#    https://github.com/settings/personal-access-tokens/new
+# 2. Re-upload:
+echo "github_pat_*" | gh secret set HOMEBREW_TAP_TOKEN \
+  --repo DriftVane/wotw-verify
+# 3. Revoke the old PAT at
+#    https://github.com/settings/personal-access-tokens
+#    (the page shows expiry dates so you can verify rotation)
+```
+
+No release-workflow changes needed for rotation — the secret value
+changes but the secret name + workflow reference stay the same.
 
 ---
 
