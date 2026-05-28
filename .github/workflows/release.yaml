@@ -59,7 +59,7 @@ jobs:
           echo "OK release artifact cosign signature verifies"
 
   # homebrew-test runs only AFTER the formula has been pushed to
-  # DriftVane/homebrew-tap. For v0.1.0 that's a manual step after the
+  # 3030-Labs/homebrew-tap. For v0.1.0 that's a manual step after the
   # release lands; the job is skipped on the v0.1.0 tag. Re-enable
   # once the tap is populated:
   #
@@ -70,7 +70,7 @@ jobs:
   #   steps:
   #     - name: install via Homebrew tap
   #       run: |
-  #         brew tap DriftVane/tap
+  #         brew tap 3030-Labs/tap
   #         brew install wotw-verify
   #         wotw-verify --version
   #         wotw-verify --self-test

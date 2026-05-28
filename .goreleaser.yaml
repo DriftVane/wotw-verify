@@ -49,7 +49,7 @@ builds:
       - -buildvcs=false
     ldflags:
       - -s -w
-      - -X github.com/DriftVane/wotw-verify/internal/verify.ToolVersion={{ .Version }}
+      - -X github.com/3030-Labs/wotw-verify/internal/verify.ToolVersion={{ .Version }}
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 archives:
@@ -119,7 +119,7 @@ changelog:
 
 release:
   github:
-    owner: DriftVane
+    owner: 3030 Labs
     name: wotw-verify
   header: |
     # wotw-verify {{ .Version }}
@@ -142,17 +142,17 @@ release:
 # Homebrew auto-update gated on HOMEBREW_TAP_TOKEN being present.
 # v0.1.0 ships without it; formula is pushed manually after the
 # release lands. Enable for v0.1.1+ by creating a fine-grained PAT
-# with `contents:write` on DriftVane/homebrew-tap and uploading as
+# with `contents:write` on 3030-Labs/homebrew-tap and uploading as
 # HOMEBREW_TAP_TOKEN secret, then uncomment the block below.
 #
 # brews:
 #   - name: wotw-verify
 #     repository:
-#       owner: DriftVane
+#       owner: 3030 Labs
 #       name: homebrew-tap
 #       branch: main
 #     directory: Formula
-#     homepage: https://github.com/DriftVane/wotw-verify
+#     homepage: https://github.com/3030-Labs/wotw-verify
 #     description: Customer-verifiable trust primitive for wotw Compliance Packs
 #     license: Apache-2.0
 #     test: |
@@ -160,5 +160,5 @@ release:
 #       system "#{bin}/wotw-verify", "--self-test"
 #     commit_author:
 #       name: driftvane-release-bot
-#       email: release-bot@driftvane.com
+#       email: release-bot@3030labs.io
 #     commit_msg_template: "wotw-verify {{ .Tag }}"

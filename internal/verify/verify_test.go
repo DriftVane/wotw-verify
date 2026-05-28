@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DriftVane/wotw-verify/internal/fixturegen"
-	"github.com/DriftVane/wotw-verify/internal/keys"
-	"github.com/DriftVane/wotw-verify/internal/verify"
+	"github.com/3030-Labs/wotw-verify/internal/fixturegen"
+	"github.com/3030-Labs/wotw-verify/internal/keys"
+	"github.com/3030-Labs/wotw-verify/internal/verify"
 )
 
 // The 5 fixture scenarios named in PASS-022 goal:

@@ -7,9 +7,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/DriftVane/wotw-verify/internal/keys"
-	"github.com/DriftVane/wotw-verify/internal/pack"
-	"github.com/DriftVane/wotw-verify/internal/provenance"
+	"github.com/3030-Labs/wotw-verify/internal/keys"
+	"github.com/3030-Labs/wotw-verify/internal/pack"
+	"github.com/3030-Labs/wotw-verify/internal/provenance"
 )
 
 // Report is the consolidated outcome of verifying a Compliance Pack.

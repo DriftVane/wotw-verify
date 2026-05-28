@@ -55,9 +55,9 @@ Provenance is a witness to **process**, not a witness to **truth**.
 For a stronger guarantee, pair `wotw-verify` with content audits
 (human review of `source_files` against `wiki_files_written`).
 
-### 2. The workspace owner did not collude with DriftVane
+### 2. The workspace owner did not collude with 3030 Labs
 
-A workspace owner with cooperation from DriftVane could:
+A workspace owner with cooperation from 3030 Labs could:
 
 - Backdate `timestamp` fields when generating the pack (the timestamp
   is part of the canonical payload, but the workspace owner controls
@@ -75,17 +75,17 @@ To defend against collusion, augment with:
 - Cross-workspace consistency: if multiple workspaces touch overlapping
   sources, their chains should be mutually consistent.
 
-### 3. The cosign public key in this repo is genuinely DriftVane's
+### 3. The cosign public key in this repo is genuinely 3030 Labs'
 
-`cosign.pub` in this repo is published by DriftVane. The trust chain
+`cosign.pub` in this repo is published by 3030 Labs. The trust chain
 for that key is:
 
 ```
 You trust            because               which trusts
 ─────                ────────              ───────────
 GitHub.com           SSL CA (Let's Encrypt) WebPKI roots in your OS
-DriftVane org        GitHub authentication of the org owner
-cosign.pub commit    Git history (DriftVane's release process)
+3030 Labs org        GitHub authentication of the org owner
+cosign.pub commit    Git history (3030 Labs' release process)
 ```
 
 If any link in that chain is compromised (rogue Git commit, GitHub
@@ -124,7 +124,7 @@ Defenses:
 
 - Keep `K` in a hardware security module / cloud KMS.
 - Rotate `K` periodically via the wotw daemon's `wotw workspace
-  rotate-kek` operation (see [daemon docs](https://github.com/DriftVane/watcher-on-the-wall/blob/main/docs/policies/kek-rotation.md)).
+  rotate-kek` operation (see [daemon docs](https://github.com/3030-Labs/watcher-on-the-wall/blob/main/docs/policies/kek-rotation.md)).
 - A rotated `K` invalidates an attacker's stolen copy for any records
   written after rotation — but past records remain forge-able by
   whoever held the old `K` at the time.
@@ -137,7 +137,7 @@ Defenses:
 |-------------------------------------------------------|--------------------------------------------------------------------|
 | You hold the genuine KEK `K`                          | Attacker can mint records that verify.                             |
 | `K` is delivered out-of-band (not in the pack)        | Pack distribution is sufficient; KEK distribution is separate.     |
-| The `cosign.pub` you used is genuinely DriftVane's    | Attacker could distribute a malicious `wotw-verify` binary.         |
+| The `cosign.pub` you used is genuinely 3030 Labs'    | Attacker could distribute a malicious `wotw-verify` binary.         |
 | The Go stdlib `crypto/sha256` + `crypto/hmac` are sound | Unknown — if SHA-256 is broken, the whole chain collapses.         |
 | AES-256-GCM is sound                                  | Unknown — if AES-GCM is broken, DEKs can be recovered.             |
 | The daemon was not malicious when the chain was written | Chain reflects whatever the daemon did; no defense from the verifier. |
@@ -166,7 +166,7 @@ container or jailed VM with no network access.
 
 ## Reporting a vulnerability
 
-Email `security@driftvane.com`. PGP key fingerprint published at
+Email `security@3030labs.io`. PGP key fingerprint published at
 `wotw.dev/security`.
 
 Do not file public issues for security vulnerabilities. We will

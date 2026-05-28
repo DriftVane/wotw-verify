@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/DriftVane/wotw-verify/internal/canonical"
+	"github.com/3030-Labs/wotw-verify/internal/canonical"
 )
 
 // GenesisChainHash is the previous_chain_hash carried by the first

@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/DriftVane/wotw-verify/internal/fixturegen"
-	"github.com/DriftVane/wotw-verify/internal/verify"
+	"github.com/3030-Labs/wotw-verify/internal/fixturegen"
+	"github.com/3030-Labs/wotw-verify/internal/verify"
 )
 
 // Result is the outcome of one self-test scenario.

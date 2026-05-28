@@ -1,7 +1,7 @@
 # wotw-verify
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/DriftVane/wotw-verify.svg)](https://pkg.go.dev/github.com/DriftVane/wotw-verify)
-[![Release](https://img.shields.io/github/v/release/DriftVane/wotw-verify)](https://github.com/DriftVane/wotw-verify/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/3030-Labs/wotw-verify.svg)](https://pkg.go.dev/github.com/3030-Labs/wotw-verify)
+[![Release](https://img.shields.io/github/v/release/3030-Labs/wotw-verify)](https://github.com/3030-Labs/wotw-verify/releases)
 
 `wotw-verify` is the **customer-verifiable trust primitive** for the
 [watcher-on-the-wall (wotw) Compliance Pack](https://wotw.dev/compliance)
@@ -29,7 +29,7 @@ There is no network access, no telemetry, no daemon required.
 ### Homebrew (macOS, Linux)
 
 ```sh
-brew install DriftVane/tap/wotw-verify
+brew install 3030-Labs/tap/wotw-verify
 ```
 
 ### One-line installer (Linux, macOS)
@@ -38,7 +38,7 @@ Until `install.wotw.dev/verify` is deployed (planned, see issue
 tracker), use the GitHub-hosted install script directly:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/DriftVane/wotw-verify/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/3030-Labs/wotw-verify/main/scripts/install.sh | sh
 ```
 
 The installer downloads the binary for your platform, verifies its
@@ -48,7 +48,7 @@ this repo), then installs to `/usr/local/bin/wotw-verify` (or
 
 ### Direct download
 
-Each release on the [Releases page](https://github.com/DriftVane/wotw-verify/releases)
+Each release on the [Releases page](https://github.com/3030-Labs/wotw-verify/releases)
 includes prebuilt binaries for:
 
 | OS      | Architecture |
@@ -70,7 +70,7 @@ cosign verify-blob --key cosign.pub \
 ### Build from source
 
 ```sh
-go install github.com/DriftVane/wotw-verify/cmd/wotw-verify@latest
+go install github.com/3030-Labs/wotw-verify/cmd/wotw-verify@latest
 ```
 
 Requires Go 1.22+.
@@ -173,7 +173,7 @@ any fail.
 |-------------------------------------------------------|-------------------------------------------------------------|
 | [`docs/verification-protocol.md`](./docs/verification-protocol.md) | The complete /internal/verify contract a reimplementor must follow. |
 | [`docs/threat-model.md`](./docs/threat-model.md)      | What wotw-verify protects against; what it doesn't.         |
-| [`docs/release-process.md`](./docs/release-process.md) | How DriftVane cuts a release + rotates the cosign signing key. |
+| [`docs/release-process.md`](./docs/release-process.md) | How 3030 Labs cuts a release + rotates the cosign signing key. |
 
 ---
 
@@ -182,9 +182,9 @@ any fail.
 `wotw-verify` is a verifier — it can prove a chain was not tampered
 with after the fact, **given the workspace key**. It does NOT prove:
 
-- That the workspace owner did not collude with DriftVane to forge the
+- That the workspace owner did not collude with 3030 Labs to forge the
   pack at generation time.
-- That the cosign public key in this repo is genuinely DriftVane's
+- That the cosign public key in this repo is genuinely 3030 Labs'
   (you trust the published key chain).
 - That the underlying source content the chain references
   (wiki/raw files) actually said what the pack claims.
@@ -195,4 +195,4 @@ The full threat model is in [`docs/threat-model.md`](./docs/threat-model.md).
 
 ## License
 
-[Apache License 2.0](./LICENSE). Copyright 2026 DriftVane LLC.
+[Apache License 2.0](./LICENSE). Copyright 2026 3030 Labs LLC.

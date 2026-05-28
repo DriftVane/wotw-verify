@@ -7,7 +7,7 @@ bit-identical results on the same inputs, by following this document
 alone.
 
 The reference contract this verifier consumes is frozen in
-[PASS-018-G5-CLOSURE.md §4](https://github.com/DriftVane/watcher-on-the-wall/blob/main/PASS-018-G5-CLOSURE.md)
+[PASS-018-G5-CLOSURE.md §4](https://github.com/3030-Labs/watcher-on-the-wall/blob/main/PASS-018-G5-CLOSURE.md)
 of the watcher-on-the-wall (daemon) repo. An embedded copy is shipped
 at [`internal/contract/pass-018-g5-closure.md`](../internal/contract/pass-018-g5-closure.md)
 and its content hash is asserted at compile time
@@ -111,7 +111,7 @@ interface ProvenanceRecord {
 The CANONICAL PAYLOAD section is what `id` hashes. The ATTESTATION and
 BACKWARD-COMPAT sections are stored on the record but NEVER included
 in `id` recomputation. This is the
-[canonical-payload-exclusion pattern](https://github.com/DriftVane/watcher-on-the-wall/blob/main/PASS-018-G5-CLOSURE.md):
+[canonical-payload-exclusion pattern](https://github.com/3030-Labs/watcher-on-the-wall/blob/main/PASS-018-G5-CLOSURE.md):
 records produced by newer daemons (that carry new optional fields)
 verify bit-identically under older daemons that don't know about
 those fields.

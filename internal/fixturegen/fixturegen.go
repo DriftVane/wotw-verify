@@ -22,8 +22,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/DriftVane/wotw-verify/internal/canonical"
-	"github.com/DriftVane/wotw-verify/internal/keys"
+	"github.com/3030-Labs/wotw-verify/internal/canonical"
+	"github.com/3030-Labs/wotw-verify/internal/keys"
 )
 
 // Genesis matches GENESIS_HASH in the daemon.

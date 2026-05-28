@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DriftVane/wotw-verify/internal/keys"
-	"github.com/DriftVane/wotw-verify/internal/selftest"
-	"github.com/DriftVane/wotw-verify/internal/verify"
+	"github.com/3030-Labs/wotw-verify/internal/keys"
+	"github.com/3030-Labs/wotw-verify/internal/selftest"
+	"github.com/3030-Labs/wotw-verify/internal/verify"
 )
 
 const usage = `wotw-verify — verify a wotw Compliance Pack offline.
@@ -51,7 +51,7 @@ Exit codes:
   1  chain has at least one verification failure
   2  malformed input
 
-See https://github.com/DriftVane/wotw-verify for the full protocol.
+See https://github.com/3030-Labs/wotw-verify for the full protocol.
 `
 
 func main() {

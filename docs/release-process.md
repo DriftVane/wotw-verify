@@ -1,6 +1,6 @@
 # Release process
 
-This document describes how DriftVane cuts a `wotw-verify` release,
+This document describes how 3030 Labs cuts a `wotw-verify` release,
 how the cosign signing key is managed, and how a third party can
 independently verify a release was built reproducibly.
 
@@ -17,7 +17,7 @@ A `wotw-verify` release consists of:
 4. Cosign signatures (`.sig` files) for every archive AND the
    checksums file.
 5. A GitHub Release containing the above.
-6. An updated Homebrew formula in `DriftVane/homebrew-tap`.
+6. An updated Homebrew formula in `3030-Labs/homebrew-tap`.
 7. A `cosign.pub` file in the repo root (rotation point — see §5).
 
 ---
@@ -68,7 +68,7 @@ The `release` GitHub Action workflow fires on tag push and runs:
    - Computes SHA-256 checksums.
    - Cosign-signs every archive + checksums file.
    - Uploads to GitHub Releases.
-   - Opens a PR against `DriftVane/homebrew-tap` updating the formula.
+   - Opens a PR against `3030-Labs/homebrew-tap` updating the formula.
 
 The workflow requires three secrets:
 
@@ -84,7 +84,7 @@ After the release publishes:
 
 ```sh
 # Download every artifact
-gh release download v0.1.0 --repo DriftVane/wotw-verify --dir ./v0.1.0/
+gh release download v0.1.0 --repo 3030-Labs/wotw-verify --dir ./v0.1.0/
 
 cd v0.1.0/
 
@@ -115,7 +115,7 @@ reproducibly from the tagged source:
 
 ```sh
 # Check out the exact tag
-git clone https://github.com/DriftVane/wotw-verify
+git clone https://github.com/3030-Labs/wotw-verify
 cd wotw-verify
 git checkout v0.1.0
 
@@ -127,7 +127,7 @@ sha256sum dist/wotw-verify_linux_amd64_v1/wotw-verify
 
 # Download and unpack the released binary for the same platform
 gh release download v0.1.0 --pattern '*linux_x86_64*' \
-  --repo DriftVane/wotw-verify
+  --repo 3030-Labs/wotw-verify
 tar -xzf wotw-verify_0.1.0_linux_x86_64.tar.gz
 sha256sum wotw-verify
 
@@ -155,11 +155,11 @@ cosign generate-key-pair
 
 # Add the encrypted private key to GitHub Actions secrets:
 gh secret set COSIGN_PRIVATE_KEY < cosign.key \
-  --repo DriftVane/wotw-verify
+  --repo 3030-Labs/wotw-verify
 
 # Add the password as a secret too:
 echo "$COSIGN_PASSWORD_VALUE" | gh secret set COSIGN_PASSWORD \
-  --repo DriftVane/wotw-verify
+  --repo 3030-Labs/wotw-verify
 
 # Commit and push the public key.
 git add cosign.pub
@@ -178,10 +178,10 @@ secret.
 
 ## 4. Verifying a release using only the published public key
 
-A customer with no DriftVane affiliation can verify any release using
+A customer with no 3030 Labs affiliation can verify any release using
 only the public key from one of:
 
-- `https://github.com/DriftVane/wotw-verify/blob/main/cosign.pub`
+- `https://github.com/3030-Labs/wotw-verify/blob/main/cosign.pub`
 - `https://wotw.dev/keys/wotw-verify.pub`
 
 ```sh
@@ -189,7 +189,7 @@ curl -fsSL https://wotw.dev/keys/wotw-verify.pub -o cosign.pub
 
 # Pick a release artifact
 gh release download v0.1.0 --pattern '*linux_x86_64*' \
-  --repo DriftVane/wotw-verify
+  --repo 3030-Labs/wotw-verify
 
 cosign verify-blob --key cosign.pub \
   --signature wotw-verify_0.1.0_linux_x86_64.tar.gz.sig \
@@ -240,9 +240,9 @@ vulnerability".
 ## 6. Homebrew tap
 
 The release workflow can optionally auto-update
-`DriftVane/homebrew-tap/Formula/wotw-verify.rb` on every tagged
+`3030-Labs/homebrew-tap/Formula/wotw-verify.rb` on every tagged
 release. This is GATED on a `HOMEBREW_TAP_TOKEN` secret being present
-on `DriftVane/wotw-verify`; in v0.1.0 the formula was pushed
+on `3030-Labs/wotw-verify`; in v0.1.0 the formula was pushed
 manually because the secret wasn't set.
 
 ### Enabling auto-update (one-time, ~15 minutes)
@@ -251,19 +251,19 @@ manually because the secret wasn't set.
    https://github.com/settings/personal-access-tokens/new
 
    - **Token name:** `wotw-verify release: homebrew-tap auto-update`
-   - **Resource owner:** `DriftVane`
-   - **Repository access:** Only select repositories → `DriftVane/homebrew-tap`
+   - **Resource owner:** `3030 Labs`
+   - **Repository access:** Only select repositories → `3030-Labs/homebrew-tap`
    - **Repository permissions:** Contents → **Read and write**
      (all other permissions stay at default "no access")
    - **Expiration:** 1 year (or your preferred policy; remember to rotate)
 
    Copy the resulting `github_pat_*` token to clipboard.
 
-2. Upload the token as a secret on `DriftVane/wotw-verify`:
+2. Upload the token as a secret on `3030-Labs/wotw-verify`:
 
    ```sh
    echo "github_pat_*" | gh secret set HOMEBREW_TAP_TOKEN \
-     --repo DriftVane/wotw-verify
+     --repo 3030-Labs/wotw-verify
    ```
 
 3. Re-enable the relevant blocks (commented out in v0.1.0):
@@ -276,7 +276,7 @@ manually because the secret wasn't set.
 4. Commit and tag the next release. The release workflow will:
 
    - Compute SHA-256s for the macOS + Linux archives.
-   - Open a commit on `DriftVane/homebrew-tap` (NOT a PR — direct
+   - Open a commit on `3030-Labs/homebrew-tap` (NOT a PR — direct
      push to `main`) updating `Formula/wotw-verify.rb`.
    - Trigger the `homebrew-test` job which runs `brew install` on
      `macos-14` (Apple Silicon) and asserts `wotw-verify --version`
@@ -295,14 +295,14 @@ After the release publishes:
 
 ```sh
 # Get the SHA-256s
-gh release view v$VERSION --repo DriftVane/wotw-verify \
+gh release view v$VERSION --repo 3030-Labs/wotw-verify \
   --json assets --jq '.assets[].name'
-gh release download v$VERSION --repo DriftVane/wotw-verify \
+gh release download v$VERSION --repo 3030-Labs/wotw-verify \
   --pattern 'wotw-verify_*_checksums.txt'
 cat wotw-verify_${VERSION}_checksums.txt
 
 # Update the formula manually
-git clone https://github.com/DriftVane/homebrew-tap
+git clone https://github.com/3030-Labs/homebrew-tap
 # Edit Formula/wotw-verify.rb: bump version + URLs + sha256 lines
 git commit -am "wotw-verify v$VERSION"
 git push
@@ -322,7 +322,7 @@ Before expiry:
 #    https://github.com/settings/personal-access-tokens/new
 # 2. Re-upload:
 echo "github_pat_*" | gh secret set HOMEBREW_TAP_TOKEN \
-  --repo DriftVane/wotw-verify
+  --repo 3030-Labs/wotw-verify
 # 3. Revoke the old PAT at
 #    https://github.com/settings/personal-access-tokens
 #    (the page shows expiry dates so you can verify rotation)
@@ -353,7 +353,7 @@ content):
 
 ```sh
 # Delete from GitHub
-gh release delete v0.1.0 --yes --cleanup-tag --repo DriftVane/wotw-verify
+gh release delete v0.1.0 --yes --cleanup-tag --repo 3030-Labs/wotw-verify
 
 # Move the tag locally
 git tag -d v0.1.0
