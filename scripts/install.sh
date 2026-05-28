@@ -9,7 +9,7 @@
 #
 # Usage:
 #   curl -fsSL https://install.wotw.dev/verify | sh
-#   curl -fsSL https://install.wotw.dev/verify | sh -s -- v0.1.0
+#   curl -fsSL https://install.wotw.dev/verify | sh -s -- v0.1.1
 #
 # This script REQUIRES `curl`, `tar` (or `unzip` for Windows), and
 # `cosign`. cosign is installed via your package manager:
